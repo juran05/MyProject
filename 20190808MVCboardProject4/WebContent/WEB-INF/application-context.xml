@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 클래스등록 -->
+<beans>
+	<bean id="list.do" class="com.sist.model.ListModel"/>
+	<bean id="detail.do" class="com.sist.model.DetailModel"/>
+	<bean id="insert.do" class="com.sist.model.InsertModel"/>
+	<bean id="insert_ok.do" class="com.sist.model.InsertOkModel"/>
+	
+	<bean id="update.do" class="com.sist.model.UpdateModel"/>
+	<bean id="update_ok.do" class="com.sist.model.UpdateOkModel"/>
+	<bean id="delete.do" class="com.sist.model.DeleteModel"/>
+	<bean id="delete_ok.do" class="com.sist.model.DeleteOkModel"/>
+	<bean id="find.do" class="com.sist.model.FindModel"/>
+
+</beans>

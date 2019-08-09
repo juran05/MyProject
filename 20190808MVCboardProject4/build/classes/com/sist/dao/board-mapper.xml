@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sist.dao.board-mapper">
+  <select id="boardListData" resultType="BoardVO" parameterType="java.util.Map">
+    SELECT no,subject,name,regdate,hit,num 
+    FROM (SELECT no,subject,name,regdate,hit,rownum as num  
+    FROM (SELECT no,subject,name,regdate,hit 
+    FROM board ORDER BY no DESC))
+    WHERE num BETWEEN #{start} AND #{end}
+    <!-- 
+          #{start} ==> map.get("start")
+          Map map=new HashMap();
+          map.put("start",1)
+          
+          name => #{name} => getName()
+          
+          private int no;
+		    private String name;
+		    private String subject;
+		    private String content;
+		    private String pwd;
+		    private Date regdate;
+		    private int hit;
+		    
+		    INSERT INTO board VALUES(#{no},#{name}?,?,?,?,?,?) ==> "get"+name
+     -->
+  </select>
+  <!-- 
+            조회수 증가 
+   -->
+  <sql id="where-no"><!--  중복 제거  -->
+    WHERE no=#{no}
+  </sql>
+  <update id="hitIncrement" parameterType="int">
+    UPDATE board SET
+    hit=hit+1
+    <include refid="where-no"/>
+  </update>
+  <select id="boardDetailData" resultType="BoardVO" parameterType="int">
+    SELECT no,name,subject,content,regdate,hit,TO_CHAR(regdate,'YYYY-MM-DD') as dbday
+    FROM board
+    <include refid="where-no"/>
+  </select>
+  <insert id="boardInsert" parameterType="BoardVO">
+    <!-- 
+          no 자동으로 증가 
+          selectKey : Sequence
+          order="BEFORE" => Insert문장 실행전에 수행
+          order="AFTER"  => Insert문장 실행후에 수행 
+          
+          SELECT NVL(MAX(no)+1,1) as no FROM board
+                 ================
+                 
+          SELECT dong,NVL(bunji,' ') FROM zipcode
+                      ==============(X)
+          SELECT dong,NVL(bunji,' ') as bunji FROM zipcode
+          
+          vo.setDong(rs.getString(1))
+          vo.setBunji(rs.getString(2))
+          
+          vo.setDong(rs.getString("dong"))
+          vo.setBunji(rs.getString("NVL(bunji,' ')"))
+     -->
+    <selectKey keyProperty="no" resultType="int" order="BEFORE">
+      SELECT NVL(MAX(no)+1,1) as no FROM board
+    </selectKey>
+    INSERT INTO board VALUES(
+       #{no},
+       #{name},
+       #{subject},
+       #{content},
+       #{pwd},
+       SYSDATE,
+       0
+    )
+  </insert>
+  <!-- 
+       총페이지
+       select => resultType(실행 결과 설정) , parameterType(?에 설정하는 값)
+                 ? => #{} => #{}# (ibatis:2,mybtis:3)
+   -->
+   <select id="boardTotalPage" resultType="int">
+     SELECT CEIL(COUNT(*)/10.0) FROM board
+   </select>
+   <!-- 
+      수정하기
+    -->
+    <select id="boardGetPwd" resultType="String" parameterType="int">
+      SELECT pwd FROM board 
+      <include refid="where-no"/>
+      <!-- WHERE no=#{no} -->
+    </select>
+    <update id="boardUpdate" parameterType="BoardVO">
+      UPDATE board SET
+      name=#{name},
+      subject=#{subject},
+      content=#{content}
+      <include refid="where-no"/>
+    </update>
+   <!-- 
+          삭제하기
+   -->
+   <delete id="boardDelete" parameterType="int">
+     DELETE FROM board
+     <include refid="where-no"/>
+   </delete>
+   <!-- 
+          검색 
+    -->
+    <select id="boardFindData" resultType="BoardVO" parameterType="java.util.Map">
+      <!-- column명 , 검색어  -->
+      SELECT no,subject,name,TO_CHAR(regdate,'YYYY-MM-DD') as dbday,hit
+      FROM board 
+      WHERE ${fs} LIKE '%'||#{ss}||'%'
+      <!--  fieldString searchString
+            $ => column명,table명
+            # => 일반 데이터 
+            
+            Mybatis ==> TO_CHAR(regdate,'YYYY-MM-DD')  함수는 값을 처리 할 수 없다 
+                        ============================= 별칭 (VO에 존재하는 변수명)
+       -->
+    </select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+

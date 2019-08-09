@@ -19,7 +19,7 @@
 </style>
 </head>
 <body>
-	<%-- 삭제하기 --%>
+	
    <div class="container">
      <h2 class="text-center">수정하기</h2>
      <div class="row">
